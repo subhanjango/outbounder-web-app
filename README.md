@@ -117,6 +117,12 @@ This application works on:
 - Try deleting `node_modules` folder and `package-lock.json`
 - Run `npm install` again
 
+**5. Docker issues**
+- Make sure Docker is running: `docker --version`
+- Port already in use: Change port in `docker-compose.yml` or stop conflicting services
+- Build fails: Try `docker-compose build --no-cache`
+- Container won't start: Check logs with `docker-compose logs`
+
 ### Getting Help
 
 If you encounter any issues:
@@ -150,9 +156,69 @@ outbounder-web-app/
 └── README.md            # This file
 ```
 
-## 🚀 Deployment
+## 🐳 Docker Setup (Recommended)
 
-To deploy this application:
+The easiest way to run this application is using Docker. No need to install Node.js or dependencies!
+
+### Prerequisites for Docker
+- **Docker** - [Download here](https://www.docker.com/get-started)
+- **Docker Compose** (included with Docker Desktop)
+
+### Quick Start with Docker
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/subhanjango/outbounder-web-app.git
+   cd outbounder-web-app
+   ```
+
+2. **Run with Docker Compose** (Production)
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access the Application**
+   
+   Open your browser and go to: `http://localhost:3000`
+
+### Docker Development Mode
+
+For development with hot-reload:
+
+```bash
+# Run in development mode with hot reload
+docker-compose --profile dev up outbounder-dev
+
+# Access at: http://localhost:8080
+```
+
+### Docker Commands
+
+| Command | Description |
+|---------|-------------|
+| `docker-compose up -d` | Start in production mode (background) |
+| `docker-compose up` | Start in production mode (foreground) |
+| `docker-compose down` | Stop and remove containers |
+| `docker-compose logs` | View application logs |
+| `docker-compose restart` | Restart the application |
+
+### Manual Docker Build
+
+If you prefer to build manually:
+
+```bash
+# Build the Docker image
+docker build -t outbounder-app .
+
+# Run the container
+docker run -d -p 3000:80 --name outbounder outbounder-app
+
+# Access at: http://localhost:3000
+```
+
+## 🚀 Traditional Deployment
+
+To deploy this application without Docker:
 
 1. **Build for production:**
    ```bash
