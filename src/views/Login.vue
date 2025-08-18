@@ -1,167 +1,107 @@
 <template>
-  <div class="flex align-items-center justify-content-center min-h-screen">
-    <Card style="width: 25rem">
-      <template #header>
-        <div class="text-center p-4">
-          <div class="flex align-items-center justify-content-center mb-3">
-            <i class="pi pi-users mr-2" style="font-size: 2rem"></i>
-            <h1 class="m-0">Outbounder</h1>
-          </div>
-          <h2 class="mt-0 mb-2">Welcome Back</h2>
-          <p class="text-600 m-0">Sign in to your account</p>
-        </div>
-      </template>
-      <template #content>
-        <form @submit.prevent="handleLogin">
-          <div class="field">
-            <label for="email">Email Address</label>
-            <IconField iconPosition="left" class="w-full">
-              <InputIcon class="pi pi-envelope" />
-              <InputText 
-                id="email"
-                v-model="loginForm.email" 
-                type="email"
-                placeholder="Enter your email address"
-                :class="{ 'p-invalid': errors.email }"
-                class="w-full"
-                required
-              />
-            </IconField>
-            <small v-if="errors.email" class="p-error">{{ errors.email }}</small>
-          </div>
-          
-          <div class="field">
-            <label for="password">Password</label>
-            <IconField iconPosition="left" class="w-full">
-              <InputIcon class="pi pi-lock" />
-              <Password 
-                id="password"
-                v-model="loginForm.password"
-                placeholder="Enter your password"
-                :class="{ 'p-invalid': errors.password }"
-                class="w-full"
-                :feedback="false"
-                toggleMask
-                required
-              />
-            </IconField>
-            <small v-if="errors.password" class="p-error">{{ errors.password }}</small>
-          </div>
-          
-          <Button 
-            type="submit" 
-            label="Sign In"
-            :loading="loading"
-            class="w-full"
-            icon="pi pi-sign-in"
-            size="large"
+  <div class="surface-ground min-h-screen flex align-items-center justify-content-center p-4">
+    <div class="w-full" style="max-width: 480px;">
+      <div class="text-center mb-6">
+        <h1 class="text-4xl font-bold text-900 mb-2">Sign in to your account</h1>
+      </div>
+
+      <form @submit.prevent="onSubmit" novalidate class="flex flex-column gap-4">
+        <div class="field">
+          <label for="email" class="block text-900 font-medium mb-2 text-lg">Email</label>
+          <InputText
+            id="email"
+            v-model.trim="email"
+            type="email"
+            placeholder=""
+            :class="{ 'p-invalid': submitted && emailError }"
+            class="w-full p-3 text-lg"
+            autocomplete="email"
           />
-        </form>
-        
-        <Divider align="center">
-          <span>or</span>
-        </Divider>
-        
-        <div class="text-center">
-          <p class="text-600 m-0">
-            Don't have an account? 
-            <router-link to="/register" class="text-primary no-underline">Create account</router-link>
-          </p>
+          <small v-if="submitted && emailError" class="p-error">{{ emailError }}</small>
         </div>
-      </template>
-    </Card>
-    
+
+        <div class="field">
+          <div class="flex justify-content-between align-items-center mb-2">
+            <label for="password" class="text-900 font-medium text-lg">Password</label>
+            <a href="#" class="text-primary font-medium">Forgot your password?</a>
+          </div>
+          <Password
+            id="password"
+            v-model.trim="password"
+            placeholder=""
+            :feedback="false"
+            toggleMask
+            :class="{ 'p-invalid': submitted && passwordError }"
+            inputClass="w-full p-3 text-lg"
+            :inputStyle="{ width: '100%', padding: '0.75rem' }"
+            autocomplete="current-password"
+          />
+          <small v-if="submitted && passwordError" class="p-error">{{ passwordError }}</small>
+        </div>
+
+        <div class="flex align-items-center mb-2">
+          <Checkbox inputId="remember" v-model="rememberMe" :binary="true" />
+          <label for="remember" class="ml-2 text-900">Remember me on this device</label>
+        </div>
+
+        <Button 
+          type="submit" 
+          label="Sign in" 
+          class="w-full p-3 text-lg font-medium"
+          :disabled="isSubmitting" 
+        />
+      </form>
+    </div>
     <Toast />
   </div>
 </template>
 
 <script>
-import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
+import Checkbox from 'primevue/checkbox'
 import Button from 'primevue/button'
 import Toast from 'primevue/toast'
-import Divider from 'primevue/divider'
-import IconField from 'primevue/iconfield'
-import InputIcon from 'primevue/inputicon'
-import { useToast } from 'primevue/usetoast'
 
 export default {
   name: 'Login',
-  components: {
-    Card,
-    InputText,
-    Password,
-    Button,
-    Toast,
-    Divider,
-    IconField,
-    InputIcon
-  },
+  components: { InputText, Password, Checkbox, Button, Toast },
   data() {
     return {
-      loginForm: {
-        email: '',
-        password: ''
-      },
-      errors: {},
-      loading: false
+      email: '',
+      password: '',
+      rememberMe: false,
+      submitted: false,
+      isSubmitting: false
     }
   },
-  setup() {
-    const toast = useToast()
-    return { toast }
+  computed: {
+    emailError() {
+      if (!this.email) return 'Email is required'
+      const emailPattern = /[^\s@]+@[^\s@]+\.[^\s@]+/
+      return emailPattern.test(this.email) ? '' : 'Please enter a valid email'
+    },
+    passwordError() {
+      if (!this.password) return 'Password is required'
+      return ''
+    },
+    isFormValid() {
+      return !this.emailError && !this.passwordError
+    }
   },
   methods: {
-    validateForm() {
-      this.errors = {}
-      
-      if (!this.loginForm.email) {
-        this.errors.email = 'Email is required'
-      } else if (!/\S+@\S+\.\S+/.test(this.loginForm.email)) {
-        this.errors.email = 'Email is invalid'
-      }
-      
-      if (!this.loginForm.password) {
-        this.errors.password = 'Password is required'
-      } else if (this.loginForm.password.length < 6) {
-        this.errors.password = 'Password must be at least 6 characters'
-      }
-      
-      return Object.keys(this.errors).length === 0
-    },
-    
-    async handleLogin() {
-      if (!this.validateForm()) return
-      
-      this.loading = true
-      
+    async onSubmit() {
+      this.submitted = true
+      if (!this.isFormValid) return
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Mock successful login
-        const token = 'mock-jwt-token-' + Date.now()
-        localStorage.setItem('authToken', token)
-        localStorage.setItem('userEmail', this.loginForm.email)
-        
-        this.toast.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Login successful!',
-          life: 3000
-        })
-        
-        this.$router.push('/dashboard')
-      } catch (error) {
-        this.toast.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Login failed. Please try again.',
-          life: 3000
-        })
+        this.isSubmitting = true
+        // Simulate login request
+        await new Promise((r) => setTimeout(r, 800))
+        this.$toast.add({ severity: 'success', summary: 'Signed in', detail: `Welcome back, ${this.email}`, life: 2000 })
+      } catch (e) {
+        this.$toast.add({ severity: 'error', summary: 'Login failed', detail: 'Please try again', life: 2500 })
       } finally {
-        this.loading = false
+        this.isSubmitting = false
       }
     }
   }
@@ -169,5 +109,11 @@ export default {
 </script>
 
 <style scoped>
-/* No custom styling - using only PrimeVue default components and PrimeFlex utilities */
+@media (max-width: 480px) {
+  h1 { font-size: 2rem; }
+  .text-lg { font-size: 1rem; }
+  .p-3 { padding: 0.75rem; }
+}
 </style>
+
+

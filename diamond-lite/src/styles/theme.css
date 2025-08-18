@@ -1,0 +1,178 @@
+:root {
+  --surface-ground: #F6F7F9;
+  --surface-card: #FFFFFF;
+  --surface-border: #E5E7EB;
+  --text-color: #0F172A;
+  --muted: #64748B;
+  --success: #10B981;
+  --indigo: #6366F1;
+  --purple: #8B5CF6;
+  --blue: #3B82F6;
+  --radius-xl: 16px;
+  --shadow-soft: 0 2px 10px rgba(15, 23, 42, 0.06);
+}
+
+html, body, #app { height: 100%; }
+body {
+  margin: 0;
+  background: var(--surface-ground);
+  color: var(--text-color);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial;
+}
+
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  padding: 24px;
+}
+
+.topbar { position: sticky; top: 0; z-index: 20; background: var(--surface-card); border-bottom: 1px solid var(--surface-border); }
+
+.sidebar { width: 280px; background: #0B1220; color: #c7d2fe; min-height: 100vh; position: fixed; top: 0; left: 0; z-index: 1000; }
+.sidebar a { text-decoration: none; color: #cbd5e1; }
+.sidebar .item { border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 8px; }
+.sidebar .item.active { background: rgba(99,102,241,0.18); color: #eef2ff; }
+.sidebar .section-title { color: #8ea0c7; font-size: 12px; letter-spacing: .06em; }
+
+.layout-main { margin-left: 280px; }
+
+@media (max-width: 767px) {
+  .sidebar { width: 84%; max-width: 340px; }
+  .layout-main { margin-left: 0; }
+}
+
+.subtle { color: var(--muted); font-size: 12px; }
+
+.sparkline .p-chart { height: 48px !important; }
+.sparkline canvas { height: 48px !important; }
+
+/* Table rounded corners */
+.p-datatable {
+  border-radius: var(--radius-xl) !important;
+  overflow: hidden !important;
+}
+
+.p-datatable .p-datatable-header {
+  border-top-left-radius: var(--radius-xl) !important;
+  border-top-right-radius: var(--radius-xl) !important;
+}
+
+.p-datatable .p-datatable-thead > tr:first-child > th:first-child {
+  border-top-left-radius: var(--radius-xl) !important;
+}
+
+.p-datatable .p-datatable-thead > tr:first-child > th:last-child {
+  border-top-right-radius: var(--radius-xl) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:last-child > td:first-child {
+  border-bottom-left-radius: var(--radius-xl) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:last-child > td:last-child {
+  border-bottom-right-radius: var(--radius-xl) !important;
+}
+
+/* Force uniform table rows */
+.p-datatable .p-datatable-tbody > tr {
+  height: 3rem !important;
+  max-height: 3rem !important;
+  min-height: 3rem !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.5rem !important;
+  height: 3rem !important;
+  max-height: 3rem !important;
+  min-height: 3rem !important;
+  vertical-align: middle !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  padding: 0.5rem !important;
+  height: 3rem !important;
+}
+
+/* Force tags container to not wrap */
+.p-datatable .p-datatable-tbody .flex.gap-1.flex-wrap {
+  flex-wrap: nowrap !important;
+  overflow: hidden !important;
+  height: 1.5rem !important;
+  max-height: 1.5rem !important;
+}
+
+/* Keep tags and chips compact and inline */
+.p-chip {
+  font-size: 0.7rem !important;
+  padding: 0.125rem 0.375rem !important;
+  height: 1.25rem !important;
+  max-height: 1.25rem !important;
+  min-height: 1.25rem !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* Keep badges compact */
+.p-badge {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  min-width: auto !important;
+  height: 1.5rem !important;
+  max-height: 1.5rem !important;
+}
+
+/* Keep tags compact */
+.p-tag {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  height: 1.5rem !important;
+  max-height: 1.5rem !important;
+}
+
+/* Keep company logos small */
+.p-datatable .p-datatable-tbody img {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  max-width: 1.5rem !important;
+  max-height: 1.5rem !important;
+}
+
+/* Ensure company name container doesn't expand */
+.p-datatable .p-datatable-tbody .flex.align-items-center.gap-2 {
+  height: 1.5rem !important;
+  max-height: 1.5rem !important;
+  overflow: hidden !important;
+}
+
+/* Checkbox column styling */
+.p-datatable .p-datatable-thead .p-selection-column,
+.p-datatable .p-datatable-tbody .p-selection-column {
+  width: 3rem !important;
+  max-width: 3rem !important;
+  min-width: 3rem !important;
+  text-align: center !important;
+}
+
+.p-datatable .p-checkbox {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+html.dark {
+  --surface-ground: #0f172a;
+  --surface-card: #111827;
+  --surface-border: #1f2937;
+  --text-color: #e5e7eb;
+  --muted: #9ca3af;
+}
+
+html.dark body { background: #0f172a; color: #e5e7eb; }
+html.dark .card, html.dark .topbar { background: #111827; border-color: #1f2937; box-shadow: none; }
+html.dark .subtle { color: #9ca3af; }
+
+
