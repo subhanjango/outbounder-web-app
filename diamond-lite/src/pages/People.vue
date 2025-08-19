@@ -621,7 +621,7 @@ export default {
         'Metronome': 'metronome.com',
         'Graphite': 'graphite.dev',
         'Casechek': 'casechek.com',
-        'DonationXchange': 'donationxchange.com',
+
         'Fueloyal': 'fueloyal.com',
         'BookingKoala': 'bookingkoala.com',
         'Stainless': 'stainless.com',
