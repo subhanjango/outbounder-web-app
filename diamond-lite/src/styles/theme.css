@@ -149,13 +149,61 @@ body {
   overflow: hidden !important;
 }
 
-/* Checkbox column styling */
-.p-datatable .p-datatable-thead .p-selection-column,
-.p-datatable .p-datatable-tbody .p-selection-column {
+/* Frozen columns styling - Target PrimeVue frozen columns */
+.p-datatable .p-frozen-column {
+  position: sticky !important;
+  z-index: 100 !important;
+  background: var(--surface-card) !important;
+  border-right: 1px solid var(--surface-border) !important;
+}
+
+.p-datatable-thead .p-frozen-column {
+  z-index: 101 !important;
+}
+
+/* First frozen column (checkbox) - stays at left: 0 */
+.p-datatable .p-frozen-column:first-child {
+  left: 0 !important;
+  border-right: 2px solid var(--surface-border) !important;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Second frozen column (company name) - positioned after checkbox column */
+.p-datatable .p-frozen-column:nth-child(2) {
+  left: 3rem !important;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Selection column specific styling */
+.p-datatable .p-selection-column {
   width: 3rem !important;
   max-width: 3rem !important;
   min-width: 3rem !important;
   text-align: center !important;
+}
+
+/* Ensure scrollable wrapper allows horizontal scroll */
+.p-datatable .p-datatable-wrapper {
+  overflow-x: auto !important;
+  position: relative !important;
+}
+
+.p-datatable .p-datatable-table {
+  position: relative !important;
+}
+
+/* Dark mode support for frozen columns */
+html.dark .p-datatable .p-frozen-column {
+  background: #111827 !important;
+  border-right-color: #1f2937 !important;
+}
+
+html.dark .p-datatable .p-frozen-column:first-child {
+  box-shadow: 2px 0 4px rgba(0,0,0,0.2) !important;
+}
+
+html.dark .p-datatable .p-frozen-column:nth-child(2) {
+  box-shadow: 2px 0 4px rgba(0,0,0,0.2) !important;
 }
 
 .p-datatable .p-checkbox {

@@ -22,7 +22,7 @@
           :disabled="!selectedCompanies || selectedCompanies.length === 0"
         />
         <Button label="View People" icon="pi pi-users" outlined />
-        <Button label="Create AI Column" icon="pi pi-plus" outlined />
+        <Button label="Create AI Column" icon="pi pi-plus" outlined @click="showCreateAIColumnDialog = true" />
         <Button label="Create Campaign" icon="pi pi-megaphone" outlined />
         <Button label="Add Companies" icon="pi pi-plus" @click="showAddCompaniesDialog = true" />
       </div>
@@ -139,6 +139,108 @@
       </template>
     </Dialog>
 
+    <!-- Create AI Column Dialog -->
+    <Dialog v-model:visible="showCreateAIColumnDialog" modal header="Create AI Column" :style="{width: '500px'}">
+      <div class="flex flex-column gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Column Name <span class="text-red-500">*</span></label>
+          <InputText 
+            v-model="aiColumnName" 
+            placeholder="Enter column name"
+            class="w-full"
+          />
+          <small class="text-600">This will be the header name for your AI column</small>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-2">Prompt <span class="text-red-500">*</span></label>
+          <Textarea 
+            v-model="aiColumnPrompt" 
+            placeholder="Describe what you want the AI to analyze or generate for each company..."
+            :rows="4"
+            class="w-full"
+            :autoResize="true"
+          />
+          <small class="text-600">Describe what you want the AI to do for each company</small>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-2">Output Type <span class="text-red-500">*</span></label>
+          <Dropdown 
+            v-model="aiColumnOutputType" 
+            :options="aiOutputTypes"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select output type"
+            class="w-full"
+          />
+          <small class="text-600">Choose the type of output the AI should generate</small>
+        </div>
+      </div>
+      
+      <template #footer>
+        <Button label="Cancel" text @click="cancelCreateAIColumn" />
+        <Button 
+          label="Create" 
+          @click="createAIColumn" 
+          :disabled="!aiColumnName.trim() || !aiColumnPrompt.trim() || !aiColumnOutputType"
+        />
+      </template>
+    </Dialog>
+
+    <!-- Run AI Column Dialog -->
+    <Dialog v-model:visible="showRunAIDialog" modal :header="`Run ${selectedAIColumn?.name || 'AI Column'}`" :style="{width: '400px'}">
+      <div class="flex flex-column gap-4">
+        <div class="text-sm text-600 mb-2">
+          <strong>Prompt:</strong> {{ selectedAIColumn?.prompt }}
+        </div>
+        
+        <div class="text-sm text-600 mb-2">
+          <strong>Output Type:</strong> {{ getOutputTypeLabel(selectedAIColumn?.outputType) }}
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-2">Number of Rows to Run</label>
+          <div class="flex flex-column gap-3">
+            <div class="flex gap-2">
+              <InputText 
+                v-model.number="runRowCount" 
+                type="number"
+                :min="1"
+                :max="companies.length"
+                placeholder="Enter number of rows"
+                class="flex-1"
+              />
+              <Button 
+                label="All" 
+                @click="selectAllRows" 
+                outlined 
+                size="small"
+              />
+            </div>
+            <small class="text-600">
+              Total companies: {{ companies.length }}
+            </small>
+          </div>
+        </div>
+        
+        <div class="p-3 surface-100 border-round text-sm">
+          <i class="pi pi-info-circle mr-2"></i>
+          This will run the AI analysis on {{ runRowCount || 0 }} companies. The analysis will be performed in the background.
+        </div>
+      </div>
+      
+      <template #footer>
+        <Button label="Cancel" text @click="cancelRunAI" />
+        <Button 
+          label="Run AI" 
+          @click="runAIColumn" 
+          :disabled="!runRowCount || runRowCount < 1 || runRowCount > companies.length"
+          icon="pi pi-play"
+        />
+      </template>
+    </Dialog>
+
     <!-- Companies Table -->
     <div class="card p-0">
       <DataTable 
@@ -148,7 +250,8 @@
         :loading="loading"
         :globalFilterFields="['name', 'website', 'tags']"
         :globalFilter="searchValue"
-        responsiveLayout="scroll"
+        :scrollable="true"
+        scrollHeight="600px"
         class="p-datatable-sm"
         :rowHover="true"
         filterDisplay="row"
@@ -156,8 +259,8 @@
         v-model:selection="selectedCompanies"
         dataKey="name"
       >
-        <Column selectionMode="multiple" headerStyle="width: 3rem" :exportable="false"></Column>
-        <Column field="name" header="Company Name" :sortable="true" style="min-width: 200px" :showFilterMenu="false">
+        <Column selectionMode="multiple" headerStyle="width: 3rem" :exportable="false" frozen></Column>
+        <Column field="name" header="Company Name" :sortable="true" style="min-width: 200px" :showFilterMenu="false" frozen>
           <template #body="slotProps">
             <div class="flex align-items-center gap-2">
               <img 
@@ -167,7 +270,12 @@
                 style="object-fit: contain"
                 @error="$event.target.style.display='none'"
               />
-              <div class="font-medium">{{ slotProps.data.name }}</div>
+              <a 
+                @click="navigateToCompany(slotProps.data)"
+                class="font-medium text-primary cursor-pointer no-underline hover:underline"
+              >
+                {{ slotProps.data.name }}
+              </a>
             </div>
           </template>
           <template #filter="{ filterModel, filterCallback }">
@@ -183,7 +291,7 @@
 
         <Column field="website" header="Website" :sortable="true" style="min-width: 150px" :showFilterMenu="false">
           <template #body="slotProps">
-            <a :href="`https://${slotProps.data.website}`" target="_blank" class="text-primary">
+            <a :href="`https://${slotProps.data.website}`" target="_blank" class="font-medium" style="color: inherit; text-decoration: none;">
               {{ slotProps.data.website }}
             </a>
           </template>
@@ -200,16 +308,15 @@
 
         <Column field="peopleCount" header="Number of People" :sortable="true" style="min-width: 130px" :showFilterMenu="false">
           <template #body="slotProps">
-            <Badge :value="slotProps.data.peopleCount" />
+            <span class="font-medium">{{ slotProps.data.peopleCount }}</span>
           </template>
           <template #filter="{ filterModel, filterCallback }">
             <InputText 
               v-model="filterModel.value" 
               @input="filterCallback()" 
-              placeholder="Min people"
+              placeholder="Filter by people count"
               class="p-column-filter"
               style="width: 100%"
-              type="number"
             />
           </template>
         </Column>
@@ -290,6 +397,61 @@
             />
           </template>
         </Column>
+        
+        <!-- Dynamic AI Columns -->
+        <Column 
+          v-for="aiCol in customAIColumns" 
+          :key="aiCol.id"
+          :field="aiCol.field" 
+          style="min-width: 220px" 
+          :showFilterMenu="false"
+        >
+          <template #header>
+            <div class="flex align-items-center gap-1 w-full">
+              <span class="flex-1">{{ aiCol.name }}</span>
+              <Button 
+                label="Run"
+                icon="pi pi-play" 
+                size="small" 
+                outlined
+                @click="openRunAIDialog(aiCol)"
+                v-tooltip="'Run AI column'"
+                class="text-xs"
+              />
+              <Button 
+                icon="pi pi-trash" 
+                size="small" 
+                text 
+                severity="danger"
+                @click="deleteAIColumn(aiCol)"
+                v-tooltip="'Delete AI column'"
+                class="p-0 w-2rem h-2rem"
+              />
+            </div>
+          </template>
+          <template #body="slotProps">
+            <span class="subtle">
+              <template v-if="slotProps.data[aiCol.field] === null || slotProps.data[aiCol.field] === undefined">
+                —
+              </template>
+              <template v-else-if="aiCol.outputType === 'boolean'">
+                {{ slotProps.data[aiCol.field] ? 'true' : 'false' }}
+              </template>
+              <template v-else>
+                {{ slotProps.data[aiCol.field] }}
+              </template>
+            </span>
+          </template>
+          <template #filter="{ filterModel, filterCallback }">
+            <InputText 
+              v-model="filterModel.value" 
+              @input="filterCallback()" 
+              :placeholder="`Filter ${aiCol.name}`"
+              class="p-column-filter"
+              style="width: 100%"
+            />
+          </template>
+        </Column>
 
         <template #empty>
           <div class="text-center p-4">
@@ -306,6 +468,9 @@
 <script>
 export default {
   name: 'Company',
+  mounted() {
+    this.loadPersistedData()
+  },
   data() {
     return {
       searchValue: '',
@@ -317,6 +482,19 @@ export default {
       csvFile: null,
       csvHeaders: [],
       selectedWebsiteColumn: null,
+      showCreateAIColumnDialog: false,
+      aiColumnName: '',
+      aiColumnPrompt: '',
+      aiColumnOutputType: null,
+      aiOutputTypes: [
+        { label: 'True/False', value: 'boolean' },
+        { label: 'Text', value: 'text' },
+        { label: 'Number', value: 'number' }
+      ],
+      customAIColumns: [],
+      showRunAIDialog: false,
+      selectedAIColumn: null,
+      runRowCount: null,
       statusOptions: ['Won', 'Lost', 'Active'],
       researchStatusOptions: ['Not Started', 'In Progress', 'Complete'],
       filters: {
@@ -651,7 +829,7 @@ export default {
       
       // Create company objects from unique domains
       const newCompanies = processedDomains.map(domain => {
-        return {
+        const company = {
           name: this.extractCompanyName(domain),
           website: domain,
           peopleCount: Math.floor(Math.random() * 200) + 10, // Random between 10-209
@@ -660,6 +838,13 @@ export default {
           tags: ['New Company'],
           aiColumn: null
         }
+        
+        // Add custom AI columns with null values
+        this.customAIColumns.forEach(aiCol => {
+          company[aiCol.field] = null
+        })
+        
+        return company
       })
       
       // Add to companies array
@@ -757,7 +942,7 @@ export default {
           
           // Create company objects from unique domains
           const newCompanies = processedDomains.map(domain => {
-            return {
+            const company = {
               name: this.extractCompanyName(domain),
               website: domain,
               peopleCount: Math.floor(Math.random() * 200) + 10, // Random between 10-209
@@ -766,6 +951,13 @@ export default {
               tags: ['CSV Import'],
               aiColumn: null
             }
+            
+            // Add custom AI columns with null values
+            this.customAIColumns.forEach(aiCol => {
+              company[aiCol.field] = null
+            })
+            
+            return company
           })
           
           // Add to companies array
@@ -828,6 +1020,201 @@ export default {
         detail: message,
         life: 5000
       }) || alert(message)
+    },
+    cancelCreateAIColumn() {
+      this.showCreateAIColumnDialog = false
+      this.aiColumnName = ''
+      this.aiColumnPrompt = ''
+      this.aiColumnOutputType = null
+    },
+    createAIColumn() {
+      if (!this.aiColumnName.trim() || !this.aiColumnPrompt.trim() || !this.aiColumnOutputType) {
+        return
+      }
+      
+      // Create the new AI column configuration
+      const newAIColumn = {
+        id: Date.now().toString(), // Simple ID generation
+        name: this.aiColumnName.trim(),
+        prompt: this.aiColumnPrompt.trim(),
+        outputType: this.aiColumnOutputType,
+        field: `aiColumn_${Date.now()}` // Generate unique field name
+      }
+      
+      // Add to custom AI columns array
+      this.customAIColumns.push(newAIColumn)
+      
+      // Save to localStorage
+      this.saveCustomColumns()
+      
+      // Add the new column field to all existing companies (initially null)
+      this.companies.forEach(company => {
+        company[newAIColumn.field] = null
+      })
+      
+      // Update filters to include the new column
+      this.filters[newAIColumn.field] = { value: null, matchMode: 'contains' }
+      
+      // Show success message
+      this.$toast?.add({
+        severity: 'success',
+        summary: 'AI Column Created',
+        detail: `Successfully created "${newAIColumn.name}" column`,
+        life: 3000
+      }) || alert(`Successfully created "${newAIColumn.name}" column`)
+      
+      // Close dialog and reset form
+      this.cancelCreateAIColumn()
+    },
+    openRunAIDialog(aiColumn) {
+      this.selectedAIColumn = aiColumn
+      this.runRowCount = null
+      this.showRunAIDialog = true
+    },
+    cancelRunAI() {
+      this.showRunAIDialog = false
+      this.selectedAIColumn = null
+      this.runRowCount = null
+    },
+    selectAllRows() {
+      this.runRowCount = this.companies.length
+    },
+    getOutputTypeLabel(outputType) {
+      const typeMap = {
+        'boolean': 'True/False',
+        'text': 'Text',
+        'number': 'Number'
+      }
+      return typeMap[outputType] || outputType
+    },
+    runAIColumn() {
+      if (!this.selectedAIColumn || !this.runRowCount || this.runRowCount < 1) {
+        return
+      }
+      
+      // Generate mock data for companies that don't already have data in this column
+      const companiesWithoutData = this.companies.filter(company => 
+        !company[this.selectedAIColumn.field] || company[this.selectedAIColumn.field] === null
+      )
+      
+      // Select up to runRowCount companies (either the first N without data, or all if fewer)
+      const selectedCompanies = companiesWithoutData.slice(0, Math.min(this.runRowCount, companiesWithoutData.length))
+      
+      selectedCompanies.forEach(company => {
+        company[this.selectedAIColumn.field] = this.generateMockData(this.selectedAIColumn.outputType)
+      })
+      
+      const actualCount = selectedCompanies.length
+      
+      // Show success message
+      this.$toast?.add({
+        severity: 'success',
+        summary: 'AI Analysis Complete',
+        detail: `Generated results for "${this.selectedAIColumn.name}" on ${actualCount} companies.`,
+        life: 3000
+      }) || alert(`Generated results for "${this.selectedAIColumn.name}" on ${actualCount} companies`)
+      
+      // Close dialog
+      this.cancelRunAI()
+    },
+    generateMockData(outputType) {
+      switch (outputType) {
+        case 'boolean':
+          // Ensure 50/50 distribution of true/false
+          return Math.random() >= 0.5
+        
+        case 'number':
+          // Generate random numbers between 1-100
+          return Math.floor(Math.random() * 100) + 1
+        
+        case 'text':
+        default:
+          // Generate random text responses
+          const textOptions = [
+            'High potential opportunity',
+            'Strong market fit',
+            'Moderate interest level',
+            'Requires further analysis',
+            'Not a priority target',
+            'Excellent growth prospects',
+            'Limited market overlap',
+            'Strategic partnership potential',
+            'Competitive landscape concerns',
+            'Ideal customer profile match',
+            'Budget constraints likely',
+            'Decision maker identified',
+            'Long sales cycle expected',
+            'Quick win opportunity',
+            'Complex technical requirements'
+          ]
+          return textOptions[Math.floor(Math.random() * textOptions.length)]
+      }
+    },
+    loadPersistedData() {
+      try {
+        // Load custom AI columns from localStorage
+        const savedColumns = localStorage.getItem('customAIColumns')
+        if (savedColumns) {
+          this.customAIColumns = JSON.parse(savedColumns)
+          
+          // Add filters for loaded columns
+          this.customAIColumns.forEach(aiCol => {
+            this.filters[aiCol.field] = { value: null, matchMode: 'contains' }
+          })
+          
+          // Ensure all companies have fields for the loaded columns
+          this.companies.forEach(company => {
+            this.customAIColumns.forEach(aiCol => {
+              if (!(aiCol.field in company)) {
+                company[aiCol.field] = null
+              }
+            })
+          })
+        }
+      } catch (error) {
+        console.error('Error loading persisted AI columns:', error)
+      }
+    },
+    saveCustomColumns() {
+      try {
+        localStorage.setItem('customAIColumns', JSON.stringify(this.customAIColumns))
+      } catch (error) {
+        console.error('Error saving AI columns:', error)
+      }
+    },
+    deleteAIColumn(aiColumn) {
+      const confirmed = confirm(`Are you sure you want to delete the "${aiColumn.name}" AI column? This action cannot be undone.`)
+      
+      if (confirmed) {
+        // Remove from custom columns array
+        const index = this.customAIColumns.findIndex(col => col.id === aiColumn.id)
+        if (index > -1) {
+          this.customAIColumns.splice(index, 1)
+        }
+        
+        // Save updated columns to localStorage
+        this.saveCustomColumns()
+        
+        // Remove the field from all companies
+        this.companies.forEach(company => {
+          delete company[aiColumn.field]
+        })
+        
+        // Remove from filters
+        delete this.filters[aiColumn.field]
+        
+        // Show success message
+        this.$toast?.add({
+          severity: 'success',
+          summary: 'AI Column Deleted',
+          detail: `Successfully deleted "${aiColumn.name}" column`,
+          life: 3000
+        }) || alert(`Successfully deleted "${aiColumn.name}" column`)
+      }
+    },
+    navigateToCompany(company) {
+      // Navigate to the individual company page
+      this.$router.push(`/company/${encodeURIComponent(company.name)}`)
     }
   }
 }
