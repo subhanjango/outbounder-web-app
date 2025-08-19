@@ -1270,12 +1270,6 @@ export default {
       )]
       
       if (companyNames.length === 0) {
-        this.$toast?.add({
-          severity: 'warn',
-          summary: 'No Companies',
-          detail: 'Selected companies do not have valid names',
-          life: 3000
-        }) || alert('Selected companies do not have valid names')
         return
       }
       
@@ -1284,13 +1278,6 @@ export default {
         name: 'People',
         query: { filter: companyNames.join(',') }
       })
-      
-      this.$toast?.add({
-        severity: 'info',
-        summary: 'Viewing People',
-        detail: `Showing people from ${companyNames.length} selected company${companyNames.length > 1 ? 'ies' : ''}`,
-        life: 3000
-      }) || alert(`Showing people from ${companyNames.length} selected company${companyNames.length > 1 ? 'ies' : ''}`)
     },
     clearFilter() {
       this.$router.push({ name: 'Company' })
