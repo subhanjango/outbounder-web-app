@@ -192,7 +192,7 @@ export default {
   data() {
     return {
       company: null,
-      overviewWidth: 66, // Default to ~2/3 width (similar to lg:col-8)
+      overviewWidth: 40, // Default to thinner width for more content space
       isResizing: false,
       startX: 0,
       startWidth: 0
