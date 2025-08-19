@@ -11,7 +11,7 @@ const routes = [
   { path: '/', name: 'Home', component: Home, meta: { title: 'Home' } },
   { path: '/people', name: 'People', component: People, meta: { title: 'People' } },
   { path: '/company', name: 'Company', component: Company, meta: { title: 'Company' } },
-  { path: '/company/:companyName', name: 'CompanyDetail', component: CompanyDetail, meta: { title: 'Company Detail' } },
+  { path: '/company/:companyName', name: 'CompanyDetail', component: CompanyDetail, meta: { title: '' } },
   { path: '/campaigns', name: 'Campaigns', component: Campaigns, meta: { title: 'Campaigns' } },
   { path: '/settings', name: 'Settings', component: Settings, meta: { title: 'Settings' } }
 ]
