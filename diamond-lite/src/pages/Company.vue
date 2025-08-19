@@ -603,15 +603,6 @@ export default {
           aiColumn: null
         },
         {
-          name: 'DonationXchange',
-          website: 'donationxchange.com',
-          peopleCount: 15,
-          status: 'Active',
-          researchStatus: 'Not Started',
-          tags: ['Non-profit', 'Fundraising'],
-          aiColumn: null
-        },
-        {
           name: 'Fueloyal',
           website: 'fueloyal.com',
           peopleCount: 32,

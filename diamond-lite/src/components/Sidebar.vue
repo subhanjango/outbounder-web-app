@@ -5,7 +5,8 @@
   >
     <div class="flex align-items-center justify-content-between mb-3">
       <div class="flex align-items-center gap-2">
-        <span class="text-lg font-bold">OutbounderAI</span>
+        <i class="pi pi-diamond text-2xl" />
+        <span class="text-lg font-bold">Outbounder</span>
       </div>
       <Button v-if="mobile" icon="pi pi-times" text rounded @click="$emit('close')" />
     </div>
