@@ -23,10 +23,17 @@ import Chip from 'primevue/chip'
 import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
+import FileUpload from 'primevue/fileupload'
+import Toast from 'primevue/toast'
+import ToastService from 'primevue/toastservice'
+import Tooltip from 'primevue/tooltip'
+import Menu from 'primevue/menu'
 
 const app = createApp(App)
 app.use(router)
 app.use(PrimeVue, { theme: { preset: Aura, options: { darkModeSelector: 'html.dark' } } })
+app.use(ToastService)
+app.directive('tooltip', Tooltip)
 app.component('Button', Button)
 app.component('Avatar', Avatar)
 app.component('Badge', Badge)
@@ -41,4 +48,7 @@ app.component('Chip', Chip)
 app.component('Checkbox', Checkbox)
 app.component('Dialog', Dialog)
 app.component('Textarea', Textarea)
+app.component('FileUpload', FileUpload)
+app.component('Toast', Toast)
+app.component('Menu', Menu)
 app.mount('#app')

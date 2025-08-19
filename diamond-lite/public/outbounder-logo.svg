@@ -1,0 +1,12 @@
+<svg width="320" height="70" viewBox="0 0 320 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="320" height="70" rx="8" fill="#3C3C3C"/>
+  
+  <!-- Paper Plane Arrow Logo (similar to your design) -->
+  <path d="M15 20C15 17.7909 16.7909 16 19 16L42 16C43.6569 16 45 17.3431 45 19V19C45 20.6569 43.6569 22 42 22L25 22L15 48V20Z" fill="#FF6B6B"/>
+  <path d="M15 48L25 22L42 22C43.6569 22 45 23.3431 45 25V25C45 26.6569 43.6569 28 42 28L22 28C18.6863 28 16 30.6863 16 34L15 48Z" fill="#FF6B6B"/>
+  <path d="M16 52C14.3431 52 13 50.6569 13 49C13 48.4477 13.4477 48 14 48L15 48L25 22L40 22C41.6569 22 43 23.3431 43 25V25C43 26.6569 41.6569 28 40 28L28 28L16 52Z" fill="#FF6B6B" fill-opacity="0.7"/>
+  
+  <!-- OutbounderAI Text -->
+  <text x="70" y="42" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="bold" fill="#FF6B6B" letter-spacing="1px">OUTBOUNDERAI</text>
+</svg>

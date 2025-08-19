@@ -139,10 +139,30 @@
       </template>
     </Dialog>
 
+    <!-- Filter Info -->
+    <div v-if="$route.query.filter" class="card">
+      <div class="flex align-items-center justify-content-between">
+        <div class="flex align-items-center gap-2">
+          <i class="pi pi-filter text-primary"></i>
+          <span class="font-medium">
+            Showing companies from selected contacts: 
+            <strong>{{ $route.query.filter.replace(/,/g, ', ') }}</strong>
+          </span>
+        </div>
+        <Button 
+          label="Clear Filter" 
+          icon="pi pi-times" 
+          text 
+          size="small"
+          @click="clearFilter"
+        />
+      </div>
+    </div>
+
     <!-- Companies Table -->
     <div class="card p-0">
       <DataTable 
-        :value="companies" 
+        :value="filteredCompanies" 
         :paginator="true" 
         :rows="25"
         :loading="loading"
@@ -306,6 +326,21 @@
 <script>
 export default {
   name: 'Company',
+  computed: {
+    filteredCompanies() {
+      let filtered = this.companies
+      
+      // Apply filter from query parameter if present
+      if (this.$route.query.filter) {
+        const filterCompanies = this.$route.query.filter.split(',')
+        filtered = filtered.filter(company => 
+          filterCompanies.includes(company.name)
+        )
+      }
+      
+      return filtered
+    }
+  },
   data() {
     return {
       searchValue: '',
@@ -828,6 +863,9 @@ export default {
         detail: message,
         life: 5000
       }) || alert(message)
+    },
+    clearFilter() {
+      this.$router.push({ name: 'Company' })
     }
   }
 }
