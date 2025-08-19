@@ -21,7 +21,13 @@
           @click="deleteSelected" 
           :disabled="!selectedCompanies || selectedCompanies.length === 0"
         />
-        <Button label="View People" icon="pi pi-users" outlined />
+        <Button 
+          label="View People" 
+          icon="pi pi-users" 
+          outlined 
+          @click="viewSelectedPeople"
+          :disabled="!selectedCompanies || selectedCompanies.length === 0"
+        />
         <Button label="Create AI Column" icon="pi pi-plus" outlined @click="showCreateAIColumnDialog = true" />
         <Button label="Create Campaign" icon="pi pi-megaphone" outlined />
         <Button label="Add Companies" icon="pi pi-plus" @click="showAddCompaniesDialog = true" />
@@ -1250,6 +1256,41 @@ export default {
     navigateToCompany(company) {
       // Navigate to the individual company page
       this.$router.push(`/company/${encodeURIComponent(company.name)}`)
+    },
+    viewSelectedPeople() {
+      if (!this.selectedCompanies || this.selectedCompanies.length === 0) {
+        return
+      }
+      
+      // Get unique company names from selected companies
+      const companyNames = [...new Set(
+        this.selectedCompanies
+          .map(company => company.name)
+          .filter(name => name && name.trim() !== '')
+      )]
+      
+      if (companyNames.length === 0) {
+        this.$toast?.add({
+          severity: 'warn',
+          summary: 'No Companies',
+          detail: 'Selected companies do not have valid names',
+          life: 3000
+        }) || alert('Selected companies do not have valid names')
+        return
+      }
+      
+      // Navigate to people page with filter
+      this.$router.push({
+        name: 'People',
+        query: { filter: companyNames.join(',') }
+      })
+      
+      this.$toast?.add({
+        severity: 'info',
+        summary: 'Viewing People',
+        detail: `Showing people from ${companyNames.length} selected company${companyNames.length > 1 ? 'ies' : ''}`,
+        life: 3000
+      }) || alert(`Showing people from ${companyNames.length} selected company${companyNames.length > 1 ? 'ies' : ''}`)
     },
     clearFilter() {
       this.$router.push({ name: 'Company' })

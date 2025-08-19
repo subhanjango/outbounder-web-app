@@ -1,6 +1,26 @@
 <template>
   <div class="flex flex-column gap-4">
-        <!-- Header Actions -->
+        <!-- Filter Info -->
+    <div v-if="$route.query.filter" class="card">
+      <div class="flex align-items-center justify-content-between">
+        <div class="flex align-items-center gap-2">
+          <i class="pi pi-filter text-primary"></i>
+          <span class="font-medium">
+            Showing people from selected companies: 
+            <strong>{{ $route.query.filter.replace(/,/g, ', ') }}</strong>
+          </span>
+        </div>
+        <Button 
+          label="Clear Filter" 
+          icon="pi pi-times" 
+          text 
+          size="small"
+          @click="clearFilter"
+        />
+      </div>
+    </div>
+
+    <!-- Header Actions -->
     <div class="flex flex-column md:flex-row gap-3 md:align-items-center md:justify-content-between">
       <div class="flex flex-column md:flex-row gap-3 flex-1">
         <div class="flex-1" style="max-width: 400px">
@@ -552,6 +572,14 @@ export default {
     const filteredContacts = computed(() => {
       let filtered = contacts.value
       
+      // Apply filter from query parameter if present (from selected companies)
+      if (router.currentRoute.value.query.filter) {
+        const filterCompanies = router.currentRoute.value.query.filter.split(',')
+        filtered = filtered.filter(contact => 
+          contact.company && filterCompanies.includes(contact.company)
+        )
+      }
+      
       // Search filter
       if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase()
@@ -927,6 +955,10 @@ export default {
       cancelAddContacts()
     }
     
+    const clearFilter = () => {
+      router.push({ name: 'People' })
+    }
+    
     // Initialize data
     onMounted(() => {
       loading.value = true
@@ -980,7 +1012,8 @@ export default {
       cancelAddContacts,
       addSingleContact,
       onFileSelect,
-      importContacts
+      importContacts,
+      clearFilter
     }
   }
 }
