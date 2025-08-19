@@ -961,11 +961,7 @@ export default {
     
     // Initialize data
     onMounted(() => {
-      loading.value = true
-      setTimeout(() => {
-        contacts.value = [...sampleContacts]
-        loading.value = false
-      }, 1000)
+      contacts.value = [...sampleContacts]
     })
     
     return {
