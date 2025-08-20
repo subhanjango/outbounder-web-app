@@ -13,6 +13,7 @@
         <Divider layout="vertical" class="hidden md:flex" />
         <Avatar shape="circle" label="JD" class="mr-2" />
         <Button :label="dark ? 'Light' : 'Dark'" size="small" text @click="$emit('toggle-dark')" />
+        <Button label="Logout" icon="pi pi-sign-out" size="small" text @click="$emit('logout')" />
       </div>
     </div>
   </header>
@@ -21,7 +22,8 @@
 <script>
 export default {
   name: 'Topbar',
-  props: { title: { type: String, default: 'Home' }, dark: { type: Boolean, default: false } }
+  props: { title: { type: String, default: 'Home' }, dark: { type: Boolean, default: false } },
+  emits: ['toggle-menu', 'toggle-dark', 'logout']
 }
 </script>
 

@@ -39,6 +39,8 @@ export default {
         { label: 'People', to: '/people', icon: 'pi-users' },
         { label: 'Companies', to: '/company', icon: 'pi-building' },
         { label: 'Campaigns', to: '/campaigns', icon: 'pi-megaphone' },
+        { label: 'Inbox', to: '/inbox', icon: 'pi-inbox' },
+        { label: 'Knowledge', to: '/knowledge', icon: 'pi-book' },
         { label: 'Settings', to: '/settings', icon: 'pi-cog' }
       ]
     }

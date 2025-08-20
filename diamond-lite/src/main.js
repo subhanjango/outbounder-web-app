@@ -28,6 +28,13 @@ import Toast from 'primevue/toast'
 import ToastService from 'primevue/toastservice'
 import Tooltip from 'primevue/tooltip'
 import Menu from 'primevue/menu'
+import Accordion from 'primevue/accordion'
+import AccordionTab from 'primevue/accordiontab'
+import TabView from 'primevue/tabview'
+import TabPanel from 'primevue/tabpanel'
+import MultiSelect from 'primevue/multiselect'
+import Password from 'primevue/password'
+import ConfirmDialog from 'primevue/confirmdialog'
 
 const app = createApp(App)
 app.use(router)
@@ -51,4 +58,11 @@ app.component('Textarea', Textarea)
 app.component('FileUpload', FileUpload)
 app.component('Toast', Toast)
 app.component('Menu', Menu)
+app.component('Accordion', Accordion)
+app.component('AccordionTab', AccordionTab)
+app.component('TabView', TabView)
+app.component('TabPanel', TabPanel)
+app.component('MultiSelect', MultiSelect)
+app.component('Password', Password)
+app.component('ConfirmDialog', ConfirmDialog)
 app.mount('#app')
