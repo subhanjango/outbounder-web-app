@@ -324,10 +324,33 @@
   <Dialog v-model:visible="showDraftOutreachDialog" modal :header="getCampaignDialogTitle()" :style="{width: '800px'}" :closable="true">
     <div class="flex flex-column gap-4">
       
-      <!-- Step 1: Campaign Type Selection -->
+      <!-- Step 1: Campaign Context -->
       <div v-if="campaignStep === 1" class="flex flex-column gap-4">
         <div class="text-600 mb-3">
           Create a campaign for {{ selectedContacts.length }} selected contact{{ selectedContacts.length > 1 ? 's' : '' }}
+        </div>
+        
+        <div class="flex flex-column gap-3">
+          <h3 class="m-0 mb-3">What's the context behind this campaign?</h3>
+          <div class="field">
+            <label for="campaignContext" class="block font-medium mb-2">Campaign Context *</label>
+            <Textarea 
+              id="campaignContext"
+              v-model="campaignContext" 
+              :rows="4"
+              placeholder="e.g., We're launching a new product and want to reach out to potential customers in the tech industry. The goal is to introduce our solution and schedule demos with qualified prospects."
+              class="w-full"
+              :class="{ 'p-invalid': campaignStep === 1 && !campaignContext.trim() }"
+            />
+            <small class="text-600">This context will help the AI generate more relevant and personalized copy for your campaign.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Campaign Type Selection -->
+      <div v-if="campaignStep === 2" class="flex flex-column gap-4">
+        <div class="text-600 mb-3">
+          Choose how you want to reach your contacts
         </div>
         
         <div class="flex flex-column gap-3">
@@ -369,8 +392,8 @@
         </div>
       </div>
       
-      <!-- Step 2: Campaign Steps Selection -->
-      <div v-if="campaignStep === 2" class="flex flex-column gap-4">
+      <!-- Step 3: Campaign Steps Selection -->
+      <div v-if="campaignStep === 3" class="flex flex-column gap-4">
         <div class="text-600 mb-3">
           Campaign Type: <strong>{{ campaignType === 'email' ? 'Email' : 'LinkedIn' }}</strong>
         </div>
@@ -401,8 +424,8 @@
         </div>
       </div>
       
-      <!-- Step 3: Draft Creation -->
-      <div v-if="campaignStep === 3" class="flex flex-column gap-4">
+      <!-- Step 4: Draft Creation -->
+      <div v-if="campaignStep === 4" class="flex flex-column gap-4">
         <div class="flex align-items-center justify-content-between mb-3">
           <div class="text-600">
             {{ campaignType === 'email' ? 'Email' : 'LinkedIn' }} Campaign • {{ campaignSteps }} Step{{ campaignSteps > 1 ? 's' : '' }} • {{ selectedContacts.length }} Contact{{ selectedContacts.length > 1 ? 's' : '' }}
@@ -652,7 +675,7 @@
         </div>
         <div class="flex gap-2">
           <Button 
-            v-if="campaignStep < 3"
+            v-if="campaignStep < 4"
             label="Next" 
             icon="pi pi-arrow-right"
             iconPos="right"
@@ -719,6 +742,52 @@
           outlined
           @click="trustAIShowMore"
           class="w-full"
+        />
+      </div>
+    </div>
+  </Dialog>
+
+  <!-- Campaign Name Dialog -->
+  <Dialog 
+    v-model:visible="showCampaignNameDialog" 
+    modal 
+    header="Name Your Campaign" 
+    :style="{width: '400px'}"
+    :closable="false"
+  >
+    <div class="flex flex-column gap-4">
+      <div class="text-center mb-3">
+        <i class="pi pi-tag text-4xl text-primary mb-2"></i>
+        <p class="text-600 m-0">
+          Give your campaign a memorable name to help you track its performance.
+        </p>
+      </div>
+      
+      <div class="field">
+        <label for="campaignName" class="block font-medium mb-2">Campaign Name *</label>
+        <InputText 
+          id="campaignName"
+          v-model="campaignName" 
+          placeholder="e.g., Q1 Product Launch Outreach"
+          class="w-full"
+          @keyup.enter="launchCampaignWithName"
+          autofocus
+        />
+      </div>
+      
+      <div class="flex gap-2 justify-content-end">
+        <Button 
+          label="Cancel" 
+          severity="secondary"
+          outlined
+          @click="cancelCampaignLaunch"
+        />
+        <Button 
+          label="Launch Campaign" 
+          icon="pi pi-send"
+          severity="success"
+          @click="launchCampaignWithName"
+          :disabled="!campaignName.trim()"
         />
       </div>
     </div>
@@ -828,6 +897,7 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
 import Dropdown from 'primevue/dropdown'
 import Dialog from 'primevue/dialog'
 import Avatar from 'primevue/avatar'
@@ -869,11 +939,14 @@ export default {
     const copyType = ref('ai')
     const campaignDrafts = ref([])
     const aiPrompt = ref('')
+    const campaignContext = ref('')
     const currentProspectIndex = ref(0)
     const currentViewStep = ref(1)
     const approvedSteps = ref(new Set())
     const manuallyApprovedUsers = ref(0)
     const showTrustAIDialog = ref(false)
+    const showCampaignNameDialog = ref(false)
+    const campaignName = ref('')
     
     // Form data
     const contactForm = ref({
@@ -1402,11 +1475,14 @@ export default {
       copyType.value = 'ai'
       campaignDrafts.value = []
       aiPrompt.value = ''
+      campaignContext.value = ''
       currentProspectIndex.value = 0
       currentViewStep.value = 1
       approvedSteps.value.clear()
       manuallyApprovedUsers.value = 0
       showTrustAIDialog.value = false
+      showCampaignNameDialog.value = false
+      campaignName.value = ''
       
       showDraftOutreachDialog.value = true
     }
@@ -1416,14 +1492,15 @@ export default {
     }
     
     const getCampaignDialogTitle = () => {
-      if (campaignStep.value === 1) return 'Create Campaign'
-      if (campaignStep.value === 2) return 'Campaign Steps'
+      if (campaignStep.value === 1) return 'Campaign Context'
+      if (campaignStep.value === 2) return 'Choose Campaign Type'
+      if (campaignStep.value === 3) return 'Campaign Steps'
       return 'Draft Campaign'
     }
     
     const goNextStep = () => {
-      if (campaignStep.value === 2) {
-        // Initialize campaign drafts when moving to step 3
+      if (campaignStep.value === 3) {
+        // Initialize campaign drafts when moving to step 4
         initializeCampaignDrafts()
       }
       campaignStep.value++
@@ -1435,9 +1512,12 @@ export default {
     
     const canProceedToNextStep = () => {
       if (campaignStep.value === 1) {
-        return campaignType.value !== ''
+        return campaignContext.value.trim() !== ''
       }
       if (campaignStep.value === 2) {
+        return campaignType.value !== ''
+      }
+      if (campaignStep.value === 3) {
         return campaignSteps.value >= 1 && campaignSteps.value <= 4
       }
       return false
@@ -1898,15 +1978,95 @@ Connor Holland`
         return
       }
       
+      // Show campaign naming dialog
+      showCampaignNameDialog.value = true
+    }
+    
+    const launchCampaignWithName = () => {
+      if (!campaignName.value.trim()) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Campaign Name Required',
+          detail: 'Please enter a name for your campaign',
+          life: 3000
+        })
+        return
+      }
+      
+      // Save campaign to localStorage
+      const totalContacts = selectedContacts.value.length
+      
+      // Generate performance data based on campaign type
+      let performance
+      if (campaignType.value === 'linkedin') {
+        // LinkedIn-specific performance metrics
+        const connectionsSent = totalContacts
+        const connectionsAccepted = Math.floor(totalContacts * 0.7) // 70% acceptance rate
+        const messagesSent = connectionsAccepted
+        const messagesReplied = Math.floor(messagesSent * 0.25) // 25% reply rate
+        const leadsFinished = Math.floor(totalContacts * 0.85) // 85% completed sequence
+        const leadsNotContacted = totalContacts - connectionsSent
+        
+        performance = {
+          totalLeads: totalContacts,
+          leadsFinished: leadsFinished,
+          leadsNotContacted: leadsNotContacted,
+          connectionsSent: connectionsSent,
+          connectionsAccepted: connectionsAccepted,
+          messagesSent: messagesSent,
+          messagesReplied: messagesReplied
+        }
+      } else {
+        // Email-specific performance metrics
+        performance = { 
+          sent: totalContacts, 
+          opened: Math.floor(totalContacts * 0.6), // Mock 60% open rate
+          replied: Math.floor(totalContacts * 0.15) // Mock 15% reply rate
+        }
+      }
+      
+      const newCampaign = {
+        id: Date.now(), // Simple ID generation
+        name: campaignName.value,
+        type: campaignType.value,
+        status: 'Active',
+        steps: campaignSteps.value,
+        contacts: totalContacts,
+        createdAt: new Date(),
+        performance: performance,
+        campaignData: {
+          campaignType: campaignType.value,
+          campaignSteps: campaignSteps.value,
+          copyType: copyType.value,
+          drafts: [...campaignDrafts.value],
+          contacts: [...selectedContacts.value]
+        }
+      }
+      
+      // Load existing campaigns
+      const existingCampaigns = JSON.parse(localStorage.getItem('outbounder-campaigns') || '[]')
+      
+      // Add new campaign
+      existingCampaigns.push(newCampaign)
+      
+      // Save back to localStorage
+      localStorage.setItem('outbounder-campaigns', JSON.stringify(existingCampaigns))
+      
       toast.add({
         severity: 'success',
         summary: 'Campaign Launched',
-        detail: `Successfully launched ${campaignSteps.value}-step ${campaignType.value} campaign for ${selectedContacts.value.length} contact${selectedContacts.value.length > 1 ? 's' : ''}`,
-        life: 3000
+        detail: `"${campaignName.value}" campaign sent to ${selectedContacts.value.length} contact${selectedContacts.value.length > 1 ? 's' : ''}`,
+        life: 5000
       })
       
+      showCampaignNameDialog.value = false
       closeDraftOutreachDialog()
       selectedContacts.value = []
+    }
+    
+    const cancelCampaignLaunch = () => {
+      showCampaignNameDialog.value = false
+      campaignName.value = ''
     }
     
     // Initialize data
@@ -1941,11 +2101,14 @@ Connor Holland`
       copyType,
       campaignDrafts,
       aiPrompt,
+      campaignContext,
       currentProspectIndex,
       currentViewStep,
       approvedSteps,
       manuallyApprovedUsers,
       showTrustAIDialog,
+      showCampaignNameDialog,
+      campaignName,
       
       // Computed
       filteredContacts,
@@ -1998,7 +2161,9 @@ Connor Holland`
       autoApproveRemainingContacts,
       rewriteEmail,
       saveDraft,
-      sendEmails
+      sendEmails,
+      launchCampaignWithName,
+      cancelCampaignLaunch
     }
   }
 }
