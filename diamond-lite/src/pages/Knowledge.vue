@@ -11,7 +11,7 @@
       <div v-else class="logo-fallback">
         <i class="pi pi-building"></i>
       </div>
-      <h1 class="text-3xl font-bold text-color m-0">{{ companyName ? `${companyName} Base` : 'Knowledge Base' }}</h1>
+      <h1 class="text-3xl font-bold text-color m-0">{{ companyName ? companyName : 'Knowledge' }}</h1>
     </div>
 
     <div class="card">
