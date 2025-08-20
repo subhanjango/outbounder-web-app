@@ -29,7 +29,6 @@
           :disabled="!selectedCompanies || selectedCompanies.length === 0"
         />
         <Button label="Create AI Column" icon="pi pi-plus" outlined @click="showCreateAIColumnDialog = true" />
-        <Button label="Create Campaign" icon="pi pi-megaphone" outlined />
         <Button label="Add Companies" icon="pi pi-plus" @click="showAddCompaniesDialog = true" />
       </div>
     </div>
