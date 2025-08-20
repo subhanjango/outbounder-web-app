@@ -17,30 +17,70 @@
     <div class="card">
       <Accordion multiple :activeIndex="[0]">
         <AccordionTab header="Website">
-          <div>
-            <div class="font-semibold mb-1">Company Website</div>
-            <div class="text-color-secondary">{{ onboarding.website || 'Not provided' }}</div>
+          <div class="flex justify-content-between align-items-start gap-3">
+            <div class="flex-1">
+              <div class="font-semibold mb-1">Company Website</div>
+              <div v-if="!editing.website" class="text-color-secondary">{{ onboarding.website || 'Not provided' }}</div>
+              <InputText v-else v-model="editData.website" class="w-full" placeholder="Enter website URL" />
+            </div>
+            <div class="flex gap-2">
+              <Button v-if="!editing.website" icon="pi pi-pencil" size="small" text @click="startEdit('website')" />
+              <template v-else>
+                <Button icon="pi pi-check" size="small" severity="success" @click="saveEdit('website')" />
+                <Button icon="pi pi-times" size="small" severity="secondary" @click="cancelEdit('website')" />
+              </template>
+            </div>
           </div>
         </AccordionTab>
 
         <AccordionTab header="Product Description">
-          <div>
-            <div class="font-semibold mb-1">Description</div>
-            <div class="text-color-secondary white-space-pre-line">{{ onboarding.description || 'Not provided' }}</div>
+          <div class="flex justify-content-between align-items-start gap-3">
+            <div class="flex-1">
+              <div class="font-semibold mb-1">Description</div>
+              <div v-if="!editing.description" class="text-color-secondary white-space-pre-line">{{ onboarding.description || 'Not provided' }}</div>
+              <Textarea v-else v-model="editData.description" class="w-full" rows="4" placeholder="Enter product description" />
+            </div>
+            <div class="flex gap-2">
+              <Button v-if="!editing.description" icon="pi pi-pencil" size="small" text @click="startEdit('description')" />
+              <template v-else>
+                <Button icon="pi pi-check" size="small" severity="success" @click="saveEdit('description')" />
+                <Button icon="pi pi-times" size="small" severity="secondary" @click="cancelEdit('description')" />
+              </template>
+            </div>
           </div>
         </AccordionTab>
 
         <AccordionTab header="Value Proposition">
-          <div>
-            <div class="font-semibold mb-1">How we deliver value</div>
-            <div class="text-color-secondary white-space-pre-line">{{ onboarding.valueProp || 'Not provided' }}</div>
+          <div class="flex justify-content-between align-items-start gap-3">
+            <div class="flex-1">
+              <div class="font-semibold mb-1">How we deliver value</div>
+              <div v-if="!editing.valueProp" class="text-color-secondary white-space-pre-line">{{ onboarding.valueProp || 'Not provided' }}</div>
+              <Textarea v-else v-model="editData.valueProp" class="w-full" rows="4" placeholder="Enter value proposition" />
+            </div>
+            <div class="flex gap-2">
+              <Button v-if="!editing.valueProp" icon="pi pi-pencil" size="small" text @click="startEdit('valueProp')" />
+              <template v-else>
+                <Button icon="pi pi-check" size="small" severity="success" @click="saveEdit('valueProp')" />
+                <Button icon="pi pi-times" size="small" severity="secondary" @click="cancelEdit('valueProp')" />
+              </template>
+            </div>
           </div>
         </AccordionTab>
 
         <AccordionTab header="Competitive Differentiation">
-          <div>
-            <div class="font-semibold mb-1">What makes us different</div>
-            <div class="text-color-secondary white-space-pre-line">{{ onboarding.differentiation || 'Not provided' }}</div>
+          <div class="flex justify-content-between align-items-start gap-3">
+            <div class="flex-1">
+              <div class="font-semibold mb-1">What makes us different</div>
+              <div v-if="!editing.differentiation" class="text-color-secondary white-space-pre-line">{{ onboarding.differentiation || 'Not provided' }}</div>
+              <Textarea v-else v-model="editData.differentiation" class="w-full" rows="4" placeholder="Enter competitive differentiation" />
+            </div>
+            <div class="flex gap-2">
+              <Button v-if="!editing.differentiation" icon="pi pi-pencil" size="small" text @click="startEdit('differentiation')" />
+              <template v-else>
+                <Button icon="pi pi-check" size="small" severity="success" @click="saveEdit('differentiation')" />
+                <Button icon="pi pi-times" size="small" severity="secondary" @click="cancelEdit('differentiation')" />
+              </template>
+            </div>
           </div>
         </AccordionTab>
 
@@ -95,7 +135,19 @@
         </AccordionTab>
 
         <AccordionTab header="Problem Statement">
-          <div class="text-color-secondary white-space-pre-line">{{ onboarding.problem || 'Not provided' }}</div>
+          <div class="flex justify-content-between align-items-start gap-3">
+            <div class="flex-1">
+              <div v-if="!editing.problem" class="text-color-secondary white-space-pre-line">{{ onboarding.problem || 'Not provided' }}</div>
+              <Textarea v-else v-model="editData.problem" class="w-full" rows="4" placeholder="Enter problem statement" />
+            </div>
+            <div class="flex gap-2">
+              <Button v-if="!editing.problem" icon="pi pi-pencil" size="small" text @click="startEdit('problem')" />
+              <template v-else>
+                <Button icon="pi pi-check" size="small" severity="success" @click="saveEdit('problem')" />
+                <Button icon="pi pi-times" size="small" severity="secondary" @click="cancelEdit('problem')" />
+              </template>
+            </div>
+          </div>
         </AccordionTab>
 
         <AccordionTab header="Customer Example & Outreach">
@@ -124,11 +176,22 @@
 </template>
 
 <script>
+import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
+import Button from 'primevue/button'
+
 export default {
   name: 'Knowledge',
+  components: {
+    InputText,
+    Textarea,
+    Button
+  },
   data() {
     return {
       onboarding: {},
+      editData: {},
+      editing: {},
       regionMap: {
         US: 'United States',
         CA: 'Canada',
@@ -154,6 +217,34 @@ export default {
       } catch (_e) {
         return {}
       }
+    },
+    saveOnboarding() {
+      localStorage.setItem('outbounder-onboarding', JSON.stringify(this.onboarding))
+    },
+    startEdit(field) {
+      this.editData[field] = this.onboarding[field] || ''
+      this.editing[field] = true
+    },
+    saveEdit(field) {
+      this.onboarding[field] = this.editData[field]
+      this.saveOnboarding()
+      this.editing[field] = false
+      
+      // Update company name if website was edited
+      if (field === 'website') {
+        this.deriveCompanyFromWebsite()
+      }
+      
+      this.$toast.add({
+        severity: 'success',
+        summary: 'Saved',
+        detail: 'Changes saved successfully',
+        life: 3000
+      })
+    },
+    cancelEdit(field) {
+      this.editing[field] = false
+      delete this.editData[field]
     },
     deriveCompanyFromWebsite() {
       const url = this.onboarding && this.onboarding.website
